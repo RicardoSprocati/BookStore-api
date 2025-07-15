@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "test-secret-key")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost").split(" ")
+ALLOWED_HOSTS = ['bookstore-api-hfi0.onrender.com', '127.0.0.1', 'localhost']
 
 # Application definition
 
