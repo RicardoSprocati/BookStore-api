@@ -27,7 +27,7 @@ jobs:
         run: poetry install
 
       - name: Set DATABASE_URL environment variable
-        run: echo "DATABASE_URL=postgresql://bookstore_dev:Q3w61u0DDy8zDBAxw7yQSY16reuZnnUQ@dpg-d1sg16ndiees73fi9t50-a.oregon-postgres.render.com:5432/bookstore_dev_db_s7d4" >> $GITHUB_ENV
+        run: echo "DATABASE_URL=postgresql://bookstore_dev:Q3w61u0DDy8zDBAxw7yQSY16reuZnnUQ@dpg-d1sg16ndiees73fi9t50-a/bookstore_dev_db_s7d4" >> $GITHUB_ENV
 
       - name: Run Django tests
         run: poetry run python manage.py test
