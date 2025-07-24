@@ -1,13 +1,16 @@
 name: Python application
 
-on: [push]
+on: 
+  push:
+    branches:
+      - main  # Ou qualquer branch que você deseje, como "develop" ou "feature/*"
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.11]
+        python-version: [3.11]  # Versão do Python que você quer usar
 
     runs-on: ubuntu-latest
 
@@ -20,6 +23,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
@@ -31,7 +42,15 @@ jobs:
         run: poetry --help
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --no-dev  # Ou use --dev se você precisar das dependências de desenvolvimento
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Certifique-se de definir essa variável no GitHub Secrets
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}      # Secret key para o Django
+          DJANGO_ALLOWED_HOSTS: "localhost"           # Hosts permitidos para o Django
 
       - name: Run tests
         run: poetry run python manage.py test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Certifique-se de usar o DATABASE_URL correto para o teste
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}      # Secret key para o Django
+

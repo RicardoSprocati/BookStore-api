@@ -29,17 +29,13 @@ RUN apt-get update \
 # Instala o Poetry mais recente
 RUN curl -sSL https://install.python-poetry.org | python -
 
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
-
 # Define diretório de trabalho para o Python
 WORKDIR $PYSETUP_PATH
 
 # Copia arquivos de dependências
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml poetry.lock ./ 
 
-# Instala as dependências sem pacotes de dev
+# Instala as dependências
 RUN poetry install --no-dev
 
 # Copia o restante do código
@@ -49,5 +45,5 @@ COPY . /app/
 # Expõe a porta
 EXPOSE 8000
 
-# Comando padrão
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Comando padrão usando Gunicorn para produção
+CMD ["poetry", "run", "gunicorn", "bookstore.wsgi:application", "--bind", "0.0.0.0:$PORT"]

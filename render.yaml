@@ -23,3 +23,7 @@ services:
         sync: false
       - key: SQL_PORT
         value: "5432"
+      - key: DATABASE_URL
+        sync: false
+        value: "postgresql://bookstore_dev:Q3w61u0DDy8zDBAxw7yQSY16reuZnnUQ@dpg-d1sg16ndiees73fi9t50-a.oregon-postgres.render.com/bookstore_dev_db_s7d4"
+
