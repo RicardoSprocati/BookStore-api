@@ -24,7 +24,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Poetry dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pypoetry
           key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
@@ -49,8 +49,9 @@ jobs:
           DJANGO_ALLOWED_HOSTS: "localhost"           # Hosts permitidos para o Django
 
       - name: Run tests
-        run: poetry run python manage.py test
+        run: poetry run python manage.py test --noinput  # Evita interações no ambiente CI
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}  # Certifique-se de usar o DATABASE_URL correto para o teste
           SECRET_KEY: ${{ secrets.SECRET_KEY }}      # Secret key para o Django
+
 
