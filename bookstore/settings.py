@@ -26,7 +26,7 @@ SECRET_KEY = "w3!xbs&^-vis-^fp-)w1fg046dh-10^m8f2dtd70amy%7c$mhd"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bookstore-api-ueva.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'bookstore-api-ueva.onrender.com', 'RicardoSprocati.pythonanywhere.com']
 
 # Application definition
 
