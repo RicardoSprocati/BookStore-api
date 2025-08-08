@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:16.3-alpine
     ports:
-      - "5432:5432"
+      - "5435:5436"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -23,7 +23,7 @@ services:
     volumes:
       - app_data:/usr/src/app
     ports:
-      - "8000:8000"
+      - "8081:8080"
     env_file:
       - ./env.dev
     networks:
