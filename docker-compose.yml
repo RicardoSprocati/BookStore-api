@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:16.3-alpine
     ports:
-      - "5435:5436"
+      - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -19,11 +19,12 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    # produção: TEM QUE SER O gunicorn, não runserver
+    command: gunicorn bookstore.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - app_data:/usr/src/app
     ports:
-      - "80:8000"
+      - "8000:8000"
     env_file:
       - ./env.dev
     networks:
