@@ -9,6 +9,9 @@ Python 3.5>
 Poetry
 Docker && docker-compose
 
+sudo apt update && sudo apt upgrade -y
+sudo apt install python3 python3-pip -y
+
 ```
 
 ## Quickstart
@@ -22,26 +25,28 @@ Docker && docker-compose
 2. Install dependencies:
 
    ```shell
+   
+   sudo apt install python3-poetry
+   
    cd bookstore
    poetry install
    ```
 
-3. Run local dev server:
+3. Run Migrations:
 
    ```shell
-   poetry run manage.py migrate
+   docker-compose exec web python manage.py migrate
+   ```
+   
+4. Run local dev server:
+   
+   ```shell
    poetry run python manage.py runserver
    ```
    
-4. Run docker dev server environment:
+5. Run docker dev server environment:
 
    ```shell
    docker-compose up -d --build 
-   docker-compose exec web python manage.py migrate
-   ```
-
-5. Run tests inside of docker:
-
-   ```shell
    docker-compose exec web python manage.py test
    ```
