@@ -1,53 +1,62 @@
-# Usa imagem base do Python 3.11
-FROM python:3.11-slim AS python-base
+# ========= Base =========
+FROM python:3.11-slim AS base
 
-# Define variáveis de ambiente
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.7.1 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1 \
-    PYSETUP_PATH="/opt/pysetup" \
-    VENV_PATH="/opt/pysetup/.venv"
+    PYTHONDONTWRITEBYTECODE=1
 
-# Adiciona o poetry e o venv no PATH
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
-
-# Instala dependências do sistema
+# Dependências do sistema (psycopg2, compilação etc.)
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-        curl \
-        build-essential \
-        libpq-dev gcc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends \
+     build-essential \
+     libpq-dev \
+     curl \
+  && rm -rf /var/lib/apt/lists/*
 
-# Instala o Poetry mais recente
+# Venv
+ENV VENV_PATH=/opt/venv
+RUN python -m venv $VENV_PATH
+ENV PATH="$VENV_PATH/bin:$PATH"
+
+# ========= Builder (usa Poetry só para gerar requirements) =========
+FROM base AS builder
+
+# Instala Poetry (só no build)
+ENV POETRY_HOME=/opt/poetry \
+    POETRY_VERSION=1.7.1 \
+    POETRY_NO_INTERACTION=1
 RUN curl -sSL https://install.python-poetry.org | python -
 
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
+ENV PATH="$POETRY_HOME/bin:$PATH"
 
-# Define diretório de trabalho para o Python
-WORKDIR $PYSETUP_PATH
+WORKDIR /app
 
-# Copia arquivos de dependências
+# Copia manifestos do Poetry
 COPY pyproject.toml poetry.lock ./
 
-# Instala as dependências sem pacotes de dev
-RUN poetry install --no-dev
+# Exporta requirements e instala (sem dev)
+RUN poetry export -f requirements.txt --without-hashes -o requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copia o restante do código
+# ========= Runtime =========
+FROM base AS runtime
+
+# Copia libs do builder (venv completo)
+COPY --from=builder /opt/venv /opt/venv
+
+# Diretório da app
 WORKDIR /app
-COPY . /app/
+COPY . /app
 
-# Expõe a porta
+# Pasta para estáticos coletados
+RUN mkdir -p /app/staticfiles
+
+# Entrypoint: espera o DB, roda migrations, collectstatic e sobe gunicorn
+COPY ./docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
 
-# Comando padrão
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Ajuste o módulo WSGI se o seu for outro (ex.: config.wsgi)
+ENV DJANGO_WSGI=bookstore.wsgi:application
+
+CMD ["/entrypoint.sh"]
